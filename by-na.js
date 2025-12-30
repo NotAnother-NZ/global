@@ -13,7 +13,8 @@
   const waitForGSAP = (cb) => {
     const start = performance.now();
     const check = () => {
-      if (window.gsap) return cb(window.gsap);
+      const G = window.gsap;
+      if (G) return cb(G);
       if (performance.now() - start < 5000) requestAnimationFrame(check);
     };
     check();
@@ -25,7 +26,7 @@
     if (!document.getElementById("na-hover-styles")) {
       const s = document.createElement("style");
       s.id = "na-hover-styles";
-      s.innerHTML = `[data-not-another]{position:relative;overflow:visible!important;z-index:auto}[data-not-another] > div{position:relative;z-index:2}.na-pop{position:absolute;pointer-events:none;user-select:none;font-size:28px;line-height:1;will-change:transform,opacity}`;
+      s.innerHTML = `[data-not-another]{position:relative;overflow:visible!important;z-index:auto}.na-txt{position:relative;z-index:2;display:inline-block}.na-pop{position:absolute;pointer-events:none;user-select:none;font-size:28px;line-height:1;will-change:transform,opacity}`;
       document.head.appendChild(s);
     }
 
@@ -57,6 +58,13 @@
     };
 
     document.querySelectorAll("[data-not-another]").forEach((link) => {
+      const target = link.querySelector("div");
+      if (!target) return;
+
+      if (!target.classList.contains("na-txt")) {
+        target.classList.add("na-txt");
+      }
+
       let active = false, mX = 0, mY = 0, timer, rect;
 
       const loop = () => {
