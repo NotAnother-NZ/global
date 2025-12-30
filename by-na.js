@@ -13,26 +13,19 @@
   const waitForGSAP = (cb) => {
     const start = performance.now();
     const check = () => {
-      const G = window.gsap;
-      const S = window.SplitText || (G && G.utils && G.utils.checkPrefix && window.SplitText);
-      if (G && S) return cb(G, S);
+      if (window.gsap) return cb(window.gsap);
       if (performance.now() - start < 5000) requestAnimationFrame(check);
     };
     check();
   };
 
-  waitForGSAP((gsap, SplitText) => {
-    gsap.registerPlugin(SplitText);
-
-    const DUR = 0.35;
-    const STAG = 0.01;
-    const EASE = "power3.inOut";
+  waitForGSAP((gsap) => {
     const EMOJIS = ["⚡", "🧠", "✨", "😌", "😏", "🚀", "🖤"];
 
     if (!document.getElementById("na-hover-styles")) {
       const s = document.createElement("style");
       s.id = "na-hover-styles";
-      s.innerHTML = `[data-not-another]{position:relative;overflow:visible!important;z-index:auto}.na-wrap{position:relative;overflow:hidden;display:inline-block;vertical-align:top;pointer-events:none;z-index:2}.na-clone{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;user-select:none}.na-pop{position:absolute;pointer-events:none;user-select:none;font-size:28px;line-height:1;will-change:transform,opacity}`;
+      s.innerHTML = `[data-not-another]{position:relative;overflow:visible!important;z-index:auto}[data-not-another] > div{position:relative;z-index:2}.na-pop{position:absolute;pointer-events:none;user-select:none;font-size:28px;line-height:1;will-change:transform,opacity}`;
       document.head.appendChild(s);
     }
 
@@ -64,34 +57,6 @@
     };
 
     document.querySelectorAll("[data-not-another]").forEach((link) => {
-      const target = link.querySelector("div");
-      if (!target) return;
-
-      const txt = target.innerText;
-      target.innerHTML = "";
-      
-      const wrap = document.createElement("div");
-      wrap.className = "na-wrap";
-      
-      const o = document.createElement("div");
-      o.innerText = txt; 
-      
-      const c = document.createElement("div");
-      c.className = "na-clone"; 
-      c.innerText = txt;
-
-      wrap.append(o, c);
-      target.appendChild(wrap);
-
-      const splitO = new SplitText(o, { type: "chars", charsClass: "char" });
-      const splitC = new SplitText(c, { type: "chars", charsClass: "char" });
-
-      gsap.set(splitC.chars, { yPercent: 100 });
-
-      const tl = gsap.timeline({ paused: true });
-      tl.to(splitO.chars, { yPercent: -100, duration: DUR, ease: EASE, stagger: STAG })
-        .to(splitC.chars, { yPercent: 0, duration: DUR, ease: EASE, stagger: STAG }, "<");
-
       let active = false, mX = 0, mY = 0, timer, rect;
 
       const loop = () => {
@@ -102,7 +67,6 @@
 
       link.addEventListener("mouseenter", (e) => {
         active = true;
-        tl.play();
         rect = link.getBoundingClientRect();
         mX = e.clientX - rect.left;
         mY = e.clientY - rect.top;
@@ -118,7 +82,6 @@
 
       link.addEventListener("mouseleave", () => {
         active = false;
-        tl.reverse();
         clearTimeout(timer);
       });
     });
